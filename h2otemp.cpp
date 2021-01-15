@@ -9,8 +9,8 @@
 #include "main.h"
 
 // Data wire is plugged into port 13 on the ESP32
-#define ONE_WIRE_BUS 13
-#define FAN_OUT 12
+#define ONE_WIRE_BUS 2
+#define FAN_OUT 26
 // precision
 #define TEMPERATURE_PRECISION 12
 
@@ -23,9 +23,7 @@ DallasTemperature sensors(&oneWire);
 // arrays to hold device addresses
 DeviceAddress h2oThermometer;
 
-void initTemp(void)
-{
-  delay(1000);
+void initTemp(void) {
   pinMode(FAN_OUT, OUTPUT); // pump
   digitalWrite(FAN_OUT, HIGH); // 5V=spento 0V=acceso
   // Start up the library
@@ -67,40 +65,43 @@ void initTemp(void)
   }
 }
 
-float tempHigh=25.0f;
-float tempHyst=0.5f;
 long tLastTemp=-1;
 bool bFan=false;
 void handleWaterTemperature() {
-  long tNow=millis();
-  if(tNow<tLastTemp+2000)
-    return;
-  tLastTemp=tNow;
-  if(DEBUG)
-    Serial.print("Requesting temperatures...");
-  sensors.requestTemperatures(); // Send the command to get temperatures
-  float tempC=0.0f;
-  tempC=sensors.getTempC(h2oThermometer );
-  if(DEBUG) {
-    if(tempC==DEVICE_DISCONNECTED_C) {
-      Serial.println("Error: Could not read temperature data");
-    }
-    else {
-      Serial.print("Temp C: ");
-      Serial.println(tempC);
-    }
-  }
-  // gestione ventola di raffreddamento
-  if(!bFan && tempC>tempHigh) {
-    bFan=true;
+  if(sto.fan.bEnable && timeNow.tm_hour<22 && timeNow.tm_hour>7) {  // 22-8 silence please
+    long tNow=millis();
+    if(tNow<tLastTemp+2000)
+      return;
+    tLastTemp=tNow;
     if(DEBUG)
-      Serial.println("Fan is ON!");
+      Serial.print("Requesting temperatures...");
+    sensors.requestTemperatures(); // Send the command to get temperatures
+    float tempC=0.0f;
+    tempC=sensors.getTempC(h2oThermometer );
+    if(DEBUG) {
+      if(tempC==DEVICE_DISCONNECTED_C) {
+        Serial.println("Error: Could not read temperature data");
+      }
+      else {
+        Serial.print("Temp C: ");
+        Serial.println(tempC);
+      }
+    }
+    // gestione ventola di raffreddamento
+    if(!bFan && tempC>sto.fan.tempMaxH2o) {
+      bFan=true;
+      if(DEBUG)
+        Serial.println("Fan is ON!");
+    }
+    else if(bFan && tempC<sto.fan.tempMaxH2o-sto.fan.tempHyst) {
+      bFan=false;
+      if(DEBUG)
+        Serial.println("Fan is OFF!");
+    }
   }
-  else if(bFan && tempC<tempHigh-tempHyst) {
+  else
     bFan=false;
-    if(DEBUG)
-      Serial.println("Fan is OFF!");
-  }
+  // actuator
   if(bFan)
     digitalWrite(FAN_OUT, LOW); // 0V=acceso
   else

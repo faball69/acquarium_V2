@@ -6,8 +6,7 @@
 
 #include "main.h"
 
-void setup(void)
-{
+void setup(void) {
   // Open serial communications and wait for port to open:
   if(DEBUG) {
     Serial.begin(9600);
@@ -15,16 +14,24 @@ void setup(void)
       delay(1000); // wait for serial port to connect. Needed for native USB port only
     }
   }
-  //initTemp();
-  //initLevel();
+  delay(1000);
   initWifi();
+  initWeb();
+  initAmb();
+  initTemp();
+  initLevel();
+  initScheduler();
   if(DEBUG)
     Serial.println("End of setup()");
 }
 
-void loop(void)
-{
-  //handleWaterTemperature();
-  //handleWaterLevel();
+struct tm timeNow;
+void loop(void) {
+  okTime=getLocalTime(&timeNow);
+  handleAmb(ambT, ambH);
+  handleWaterTemperature();
+  handleWaterLevel();
   handleWifi();
+  handleWeb();
+  handleScheduler();
 }
