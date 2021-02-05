@@ -65,35 +65,35 @@ void initTemp(void) {
   }
 }
 
-long tLastTemp=-1;
+long tLastTemp=-10000;
 bool bFan=false;
+float H2oTemp=0.0f;
 void handleWaterTemperature() {
-  if(sto.fan.bEnable && timeNow.tm_hour<22 && timeNow.tm_hour>7) {  // 22-8 silence please
-    long tNow=millis();
-    if(tNow<tLastTemp+2000)
-      return;
-    tLastTemp=tNow;
-    if(DEBUG)
-      Serial.print("Requesting temperatures...");
-    sensors.requestTemperatures(); // Send the command to get temperatures
-    float tempC=0.0f;
-    tempC=sensors.getTempC(h2oThermometer );
-    if(DEBUG) {
-      if(tempC==DEVICE_DISCONNECTED_C) {
-        Serial.println("Error: Could not read temperature data");
-      }
-      else {
-        Serial.print("Temp C: ");
-        Serial.println(tempC);
-      }
+  long tNow=millis();
+  if(!bForce && tNow<tLastTemp+10000)
+    return;
+  tLastTemp=tNow;
+  if(DEBUG)
+    Serial.print("Requesting temperatures...");
+  sensors.requestTemperatures(); // Send the command to get temperatures
+  H2oTemp=sensors.getTempC(h2oThermometer );
+  if(DEBUG) {
+    if(H2oTemp==DEVICE_DISCONNECTED_C) {
+      Serial.println("Error: Could not read temperature data");
     }
+    else {
+      Serial.print("Temp C: ");
+      Serial.println(H2oTemp);
+    }
+  }
+  if(sto.fan.bEnable && timeNow.tm_hour<22 && timeNow.tm_hour>7) {  // 22-8 silence please
     // gestione ventola di raffreddamento
-    if(!bFan && tempC>sto.fan.tempMaxH2o) {
+    if(!bFan && H2oTemp>sto.fan.tempMaxH2o) {
       bFan=true;
       if(DEBUG)
         Serial.println("Fan is ON!");
     }
-    else if(bFan && tempC<sto.fan.tempMaxH2o-sto.fan.tempHyst) {
+    else if(bFan && H2oTemp<sto.fan.tempMaxH2o-sto.fan.tempHyst) {
       bFan=false;
       if(DEBUG)
         Serial.println("Fan is OFF!");

@@ -16,6 +16,7 @@ stDataStore sto = {{true, 10, 5, 0},
                    {true, 28.0, 0.5},
                    {{true, 14*60, 20*60}, {true, 14*60, 20*60}}
 };
+bool bForce=false;
 
 bool saveData() {
   byte *p=(byte*)&sto;
@@ -78,17 +79,17 @@ void _handleRoot(const char *message) {
     <script>if(typeof window.history.pushState == 'function') {window.history.pushState({}, \"Hide\", \"/\");}</script>\
     <h1>acq_v2</h1>\
     <h2>Parameters:</h2>\
-    <strong>Environment Temperature: </strong> %.1f <strong> Humidity: </strong> %.1f <br><br>\
+    <strong>Environment Temperature: </strong> %.1f <strong> Humidity: </strong> %.1f <strong> Time: </strong> %.02d:%.02d <br><br>\
     <form action=\"/get\">\
     <table style=\"border-collapse: collapse; width: 100%%;\" border=\"1\">\
     <tbody>\<tr>\
-    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Pump</strong></td>\
+    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Pump</strong><br>[%s]<br>l0=%d l1=%d</td>\
     <td style=\"width: 12.5%%;\">timeMaxRefill[sec]:<input min=\"0\" max=\"600\" name=\"PP1\" step=\"1\" type=\"number\" value=\"%d\" /></td>\
-    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Fan</strong></td>\
+    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Fan</strong><br>[%s]<br>H2oTemp=%.1f</td>\
     <td style=\"width: 12.5%%;\">tempMaxH2o[deg]:<input min=\"0.0\" max=\"40.0\" name=\"PF1\" step=\"0.1\" type=\"number\" value=\"%.1f\" /></td>\
-    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Lamp1</strong></td>\
+    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Lamp1</strong><br>[%s]</td>\
     <td style=\"width: 12.5%%;\">timeStart[hh:mm]:<input type=\"time\" name=\"TS1\" value=\"%.02d:%.02d\" /></td>\
-    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Lamp2</strong></td>\
+    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Lamp2</strong><br>[%s]</td>\
     <td style=\"width: 12.5%%;\">timeStart[hh:mm]:<input type=\"time\" name=\"TS2\" value=\"%.02d:%.02d\" /></td>\
     </tr><tr>\
     <td style=\"width: 12.5%%;\">timeHyst[sec]:<input min=\"0\" max=\"600\" name=\"PP2\" step=\"1\" type=\"number\" value=\"%d\" /></td>\
@@ -109,8 +110,8 @@ void _handleRoot(const char *message) {
     <input type=submit value=Reset>\
     </form><br>\
     %s \
-    </body></html>\n", ambT, ambH,
-                       sto.pump.timeMaxRefill, sto.fan.tempMaxH2o, sto.lamp[0].timeStart/60, sto.lamp[0].timeStart%60, sto.lamp[1].timeStart/60,sto.lamp[1].timeStart%60,
+    </body></html>\n", ambT, ambH, timeNow.tm_hour, timeNow.tm_min,
+                       (bPump?"ON":"OFF"), l0, l1, sto.pump.timeMaxRefill, (bFan?"ON":"OFF"), H2oTemp, sto.fan.tempMaxH2o, (bLamp1?"ON":"OFF"), sto.lamp[0].timeStart/60, sto.lamp[0].timeStart%60, (bLamp2?"ON":"OFF"), sto.lamp[1].timeStart/60,sto.lamp[1].timeStart%60,
                        sto.pump.timeHyst, sto.fan.tempHyst, sto.lamp[0].timeEnd/60, sto.lamp[0].timeEnd%60, sto.lamp[1].timeEnd/60, sto.lamp[1].timeEnd%60,
                        sto.pump.bEnable?"checked":"", sto.fan.bEnable?"checked":"", sto.lamp[0].bEnable?"checked":"", sto.lamp[1].bEnable?"checked":"",
                        sto.pump.maskErr,
@@ -169,6 +170,7 @@ void handleSetPar() {
     sto.lamp[1].bEnable=(txtPar=="on")?true:false;
   }
   saveData();
+  bForce=true;
   _handleRoot("Parameters saved!");
 }
 
@@ -190,5 +192,7 @@ void initWeb() {
 }
 
  void handleWeb() {
+   if(bForce)
+    bForce=false;
    server.handleClient();
  }

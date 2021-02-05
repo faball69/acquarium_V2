@@ -13,7 +13,7 @@
 #include "secret.h"
 
 const char* ssid=SECRET_SSID_0;
-//const char* ssid=SECRET_SSID_1;
+//const char* ssid=SECRET_SSID_1; per OTA collegare il laptop alla rete .1. xFASTWEB
 const char* password=SECRET_PASS;
 
 //const char* ntpServer = "pool.ntp.org";
@@ -22,17 +22,29 @@ const int   daylightOffset_sec = 3600;
 IPAddress ipAddr;
 bool okTime=false;
 
+#define LED_BUILTIN 1
 void initWifi() {
   //connect to WiFi
   if(DEBUG)
     Serial.printf("Connecting to %s ", ssid);
+  else
+    pinMode(LED_BUILTIN, OUTPUT);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   while(WiFi.status()!=WL_CONNECTED) {
-      delay(500);
-      if(DEBUG)
+      if(DEBUG) {
+        delay(1000);
         Serial.print(".");
-      //ESP.restart();
+      }
+      else {
+        // lamp builtin
+        for(int v=0;v<2;v++) {
+          delay(250);
+          digitalWrite(LED_BUILTIN, LOW);
+          delay(250);
+          digitalWrite(LED_BUILTIN, HIGH);
+        }
+      }
   }
   if(DEBUG)
     Serial.println(" CONNECTED");

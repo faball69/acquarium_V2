@@ -20,30 +20,32 @@ void initLevel() {
 
 long tOn=-1;
 long tLastStop=-1;
-long tLastRead=-1;
+long tLastRead=-1000;
 long tIniSens=-1;
 long tIniHyst=-1;
 bool bPump=false;
 bool bEmpty=false;
+int nMaxRetry=3;
+int l0=0, l1=0;
 void handleWaterLevel() {
   long tRefill=sto.pump.timeMaxRefill*1000;
   long tHyst=sto.pump.timeHyst*1000;
   long tRetry=tRefill*6;
+  long tNow=millis();
+  if(!bForce && tNow<tLastRead+1000)
+    return;
+  tLastRead=tNow;
+  // read levels
+  l0=digitalRead(LEVEL_PIN0);
+  l1=digitalRead(LEVEL_PIN1);
+  if(DEBUG) {
+    // locate devices on the bus
+    Serial.print("levels l0=");
+    Serial.print(l0);
+    Serial.print(" levels l1=");
+    Serial.println(l1);
+  }
   if(sto.pump.bEnable) {
-    long tNow=millis();
-    if(tNow<tLastRead+3000)
-      return;
-    tLastRead=tNow;
-    // read levels
-    int l0=digitalRead(LEVEL_PIN0);
-    int l1=digitalRead(LEVEL_PIN1);
-    if(DEBUG) {
-      // locate devices on the bus
-      Serial.print("levels l0=");
-      Serial.print(l0);
-      Serial.print(" levels l1=");
-      Serial.println(l1);
-    }
     if(l0^l1) { // warn in sensors levels
       if(tIniSens==-1)
         tIniSens=tNow;
@@ -55,12 +57,12 @@ void handleWaterLevel() {
       tIniSens=-1;
       sto.pump.maskErr&=~0x00000002;
       if(l0&&l1)
-        bEmpty=true;
-      else
         bEmpty=false;
+      else
+        bEmpty=true;
     }
     // hysteresis on level + time
-    if(!bEmpty) {
+    if(!bEmpty && bPump) {
       if(tIniHyst==-1)
         tIniHyst=tNow;
       if(tIniHyst!=-1 && tNow<tIniHyst+tHyst)
@@ -69,17 +71,25 @@ void handleWaterLevel() {
     else
       tIniHyst=-1;
     // handle pump
-    if(!bPump && tOn==-1 && (tNow>tLastStop+tRetry || tLastStop==-1) && bEmpty) {
+    if(!bPump && tOn==-1 && (tNow>tLastStop+tRetry || tLastStop==-1) && bEmpty && nMaxRetry>0) {
       tOn=tNow;
       if(DEBUG)
         Serial.println("Pump is ON!");
       bPump=true;
     }
     else if(bPump && !bEmpty || (tOn!=-1 && tNow>tOn+tRefill)) {
-      if(tNow>tOn+tRefill)
+      if(tNow>tOn+tRefill) {
         sto.pump.maskErr|=0x00000001;
-      else
+        nMaxRetry--;
+      }
+      else {
         sto.pump.maskErr&=~0x00000001;
+        nMaxRetry=3;
+      }
+      if(nMaxRetry<1)
+        sto.pump.maskErr|=0x00000004;
+      else
+        sto.pump.maskErr&=~0x00000004;
       tOn=-1;
       tLastStop=tNow;
       if(DEBUG)

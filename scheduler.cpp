@@ -4,6 +4,7 @@
    fabrizio . allevi @ tiscali . it
 */
 #include "main.h"
+bool bLamp1, bLamp2;
 
 #define LAMP1_PIN 27
 #define LAMP2_PIN 14
@@ -19,7 +20,7 @@ long tLastSched=-60000;
 void handleScheduler() {
   if(okTime) {
     long tNow=millis();
-    if(tNow<tLastSched+60000)
+    if(!bForce && tNow<tLastSched+60000)
       return;
     tLastSched=tNow;
     int minuteNow = timeNow.tm_hour*60+timeNow.tm_min;
@@ -28,15 +29,23 @@ void handleScheduler() {
       Serial.println(minuteNow);
     }
     // lamp1
-    if(minuteNow>sto.lamp[0].timeStart && minuteNow<sto.lamp[0].timeEnd)
+    if(sto.lamp[0].bEnable && minuteNow>sto.lamp[0].timeStart && minuteNow<sto.lamp[0].timeEnd) {
+      bLamp1=true;
       digitalWrite(LAMP1_PIN, LOW);
-    else
+    }
+    else {
+      bLamp1=false;
       digitalWrite(LAMP1_PIN, HIGH);
+    }
     // lamp2
-    if(minuteNow>sto.lamp[1].timeStart && minuteNow<sto.lamp[1].timeEnd)
+    if(sto.lamp[1].bEnable && minuteNow>sto.lamp[1].timeStart && minuteNow<sto.lamp[1].timeEnd) {
+      bLamp2=true;
       digitalWrite(LAMP2_PIN, LOW);
-    else
+    }
+    else {
+      bLamp2=false;
       digitalWrite(LAMP2_PIN, HIGH);
+    }
   }
   /*delay(1000);
   digitalWrite(LAMP1_PIN, LOW);

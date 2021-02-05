@@ -7,8 +7,8 @@
 #include "main.h"
 
 void setup(void) {
-  // Open serial communications and wait for port to open:
   if(DEBUG) {
+    // Open serial communications and wait for port to open:
     Serial.begin(9600);
     while (!Serial) {
       delay(1000); // wait for serial port to connect. Needed for native USB port only

@@ -78,3 +78,6 @@ extern IPAddress ipAddr;
 extern struct tm timeNow;
 extern bool okTime;
 extern float ambT, ambH;
+extern bool bPump, bFan, bLamp1, bLamp2, bForce;
+extern int l0, l1;
+extern float H2oTemp;
