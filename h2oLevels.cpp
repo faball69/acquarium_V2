@@ -14,7 +14,7 @@ void initLevel() {
   pinMode(LEVEL_PIN0, INPUT_PULLUP); // level sensor 0
   pinMode(LEVEL_PIN1, INPUT_PULLUP); // level sensor 1
   pinMode(PUMP_OUT, OUTPUT); // pump
-  digitalWrite(PUMP_OUT, HIGH); // 5V=spento 0V=acceso
+  digitalWrite(PUMP_OUT, SPENTO); // 5V=spento 0V=acceso
   sto.pump.maskErr=0;
 }
 
@@ -101,7 +101,7 @@ void handleWaterLevel() {
     bPump=false;
   // actuator
   if(bPump)
-    digitalWrite(PUMP_OUT, LOW);
+    digitalWrite(PUMP_OUT, ACCESO);
   else
-    digitalWrite(PUMP_OUT, HIGH);
+    digitalWrite(PUMP_OUT, SPENTO);
 }

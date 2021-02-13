@@ -11,6 +11,10 @@
 #include <Arduino.h>
 #include <time.h>
 
+// inversion ON OFF for bad relay
+#define ACCESO HIGH
+#define SPENTO LOW
+
 // temp
 void initTemp(void);
 void handleWaterTemperature();

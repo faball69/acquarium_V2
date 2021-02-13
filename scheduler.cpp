@@ -12,8 +12,8 @@ bool bLamp1, bLamp2;
 void initScheduler() {
   pinMode(LAMP1_PIN, OUTPUT);
   pinMode(LAMP2_PIN, OUTPUT);
-  digitalWrite(LAMP1_PIN, HIGH);
-  digitalWrite(LAMP2_PIN, HIGH);
+  digitalWrite(LAMP1_PIN, SPENTO);
+  digitalWrite(LAMP2_PIN, SPENTO);
 }
 
 long tLastSched=-60000;
@@ -31,20 +31,20 @@ void handleScheduler() {
     // lamp1
     if(sto.lamp[0].bEnable && minuteNow>sto.lamp[0].timeStart && minuteNow<sto.lamp[0].timeEnd) {
       bLamp1=true;
-      digitalWrite(LAMP1_PIN, LOW);
+      digitalWrite(LAMP1_PIN, ACCESO);
     }
     else {
       bLamp1=false;
-      digitalWrite(LAMP1_PIN, HIGH);
+      digitalWrite(LAMP1_PIN, SPENTO);
     }
     // lamp2
     if(sto.lamp[1].bEnable && minuteNow>sto.lamp[1].timeStart && minuteNow<sto.lamp[1].timeEnd) {
       bLamp2=true;
-      digitalWrite(LAMP2_PIN, LOW);
+      digitalWrite(LAMP2_PIN, ACCESO);
     }
     else {
       bLamp2=false;
-      digitalWrite(LAMP2_PIN, HIGH);
+      digitalWrite(LAMP2_PIN, SPENTO);
     }
   }
   /*delay(1000);

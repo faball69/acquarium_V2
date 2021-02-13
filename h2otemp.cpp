@@ -25,7 +25,7 @@ DeviceAddress h2oThermometer;
 
 void initTemp(void) {
   pinMode(FAN_OUT, OUTPUT); // pump
-  digitalWrite(FAN_OUT, HIGH); // 5V=spento 0V=acceso
+  digitalWrite(FAN_OUT, SPENTO); // 5V=spento 0V=acceso
   // Start up the library
   sensors.begin();
   if(DEBUG) {
@@ -103,7 +103,7 @@ void handleWaterTemperature() {
     bFan=false;
   // actuator
   if(bFan)
-    digitalWrite(FAN_OUT, LOW); // 0V=acceso
+    digitalWrite(FAN_OUT, ACCESO); // 0V=acceso
   else
-    digitalWrite(FAN_OUT, HIGH); // 5V=spento
+    digitalWrite(FAN_OUT, SPENTO); // 5V=spento
 }
