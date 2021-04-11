@@ -8,7 +8,7 @@
 
 #define LEVEL_PIN0 23
 #define LEVEL_PIN1 19
-#define PUMP_OUT 25
+#define PUMP_OUT 26
 
 void initLevel() {
   pinMode(LEVEL_PIN0, INPUT_PULLUP); // level sensor 0

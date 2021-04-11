@@ -13,7 +13,7 @@
 #include "secret.h"
 
 const char* ssid=SECRET_SSID_0;
-//const char* ssid=SECRET_SSID_1; per OTA collegare il laptop alla rete .1. xFASTWEB
+//const char* ssid=SECRET_SSID_1; per OTA collegare il laptop alla rete1.
 const char* password=SECRET_PASS;
 
 //const char* ntpServer = "pool.ntp.org";

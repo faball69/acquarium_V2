@@ -10,7 +10,7 @@
 
 // Data wire is plugged into port 13 on the ESP32
 #define ONE_WIRE_BUS 2
-#define FAN_OUT 26
+#define FAN_OUT 25
 // precision
 #define TEMPERATURE_PRECISION 12
 

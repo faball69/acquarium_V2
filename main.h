@@ -12,8 +12,8 @@
 #include <time.h>
 
 // inversion ON OFF for bad relay
-#define ACCESO HIGH
-#define SPENTO LOW
+#define ACCESO LOW
+#define SPENTO HIGH
 
 // temp
 void initTemp(void);
