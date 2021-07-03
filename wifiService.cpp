@@ -37,7 +37,7 @@ void initWifi() {
         Serial.print(".");
       }
       else {
-        // lamp builtin
+        // led builtin
         for(int v=0;v<2;v++) {
           delay(250);
           digitalWrite(LED_BUILTIN, LOW);

@@ -65,44 +65,51 @@ void initTemp(void) {
   }
 }
 
+long tTriggerF=0;
 long tLastTemp=-10000;
-bool bFan=false;
+bool bFan=false, bLastFan=false;
 float H2oTemp=0.0f;
 void handleWaterTemperature() {
   long tNow=millis();
-  if(!bForce && tNow<tLastTemp+10000)
-    return;
-  tLastTemp=tNow;
-  if(DEBUG)
-    Serial.print("Requesting temperatures...");
-  sensors.requestTemperatures(); // Send the command to get temperatures
-  H2oTemp=sensors.getTempC(h2oThermometer );
-  if(DEBUG) {
-    if(H2oTemp==DEVICE_DISCONNECTED_C) {
-      Serial.println("Error: Could not read temperature data");
+  if(bForce || tNow>tLastTemp+10000) {
+    tLastTemp=tNow;
+    if(DEBUG)
+      Serial.print("Requesting temperatures...");
+    sensors.requestTemperatures(); // Send the command to get temperatures
+    H2oTemp=sensors.getTempC(h2oThermometer );
+    if(DEBUG) {
+      if(H2oTemp==DEVICE_DISCONNECTED_C) {
+        Serial.println("Error: Could not read temperature data");
+      }
+      else {
+        Serial.print("Temp C: ");
+        Serial.println(H2oTemp);
+      }
     }
-    else {
-      Serial.print("Temp C: ");
-      Serial.println(H2oTemp);
+    if(sto.fan.bEnable && (timeNow.tm_hour==0 || timeNow.tm_hour>6)) {  // 1-7 silence please
+      // gestione ventola di raffreddamento
+      if(!bFan && H2oTemp>sto.fan.tempMaxH2o) {
+        bFan=true;
+        if(DEBUG)
+          Serial.println("Fan is ON!");
+      }
+      else if(bFan && H2oTemp<sto.fan.tempMaxH2o-sto.fan.tempHyst) {
+        bFan=false;
+        if(DEBUG)
+          Serial.println("Fan is OFF!");
+      }
     }
-  }
-  if(sto.fan.bEnable && timeNow.tm_hour<22 && timeNow.tm_hour>7) {  // 22-8 silence please
-    // gestione ventola di raffreddamento
-    if(!bFan && H2oTemp>sto.fan.tempMaxH2o) {
-      bFan=true;
-      if(DEBUG)
-        Serial.println("Fan is ON!");
-    }
-    else if(bFan && H2oTemp<sto.fan.tempMaxH2o-sto.fan.tempHyst) {
+    else
       bFan=false;
-      if(DEBUG)
-        Serial.println("Fan is OFF!");
-    }
   }
-  else
-    bFan=false;
+  if(bFan!=bLastFan) {
+    tTriggerF=millis(); // time for read temp is long so not use tNow
+    bLastFan=bFan;
+  }
+  if(tTriggerF && tNow>tTriggerF+400)
+    tTriggerF=0;
   // actuator
-  if(bFan)
+  if(tTriggerF)
     digitalWrite(FAN_OUT, ACCESO); // 0V=acceso
   else
     digitalWrite(FAN_OUT, SPENTO); // 5V=spento

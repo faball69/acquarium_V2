@@ -75,13 +75,13 @@ struct stLamp {
 struct stDataStore {
   stPump pump;
   stFan fan;
-  stLamp lamp[2];
+  stLamp lamp[3];
 };
 extern stDataStore sto;
 extern IPAddress ipAddr;
 extern struct tm timeNow;
 extern bool okTime;
 extern float ambT, ambH;
-extern bool bPump, bFan, bLamp1, bLamp2, bForce;
+extern bool bPump, bFan, bLamp1, bLamp2, bLamp3, bForce;
 extern int l0, l1;
 extern float H2oTemp;

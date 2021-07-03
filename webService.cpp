@@ -83,8 +83,8 @@ void _handleRoot(const char *message) {
     <form action=\"/get\">\
     <table style=\"border-collapse: collapse; width: 100%%;\" border=\"1\">\
     <tbody>\<tr>\
-    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Pump</strong><br>[%s]<br>l0=%d l1=%d</td>\
-    <td style=\"width: 12.5%%;\">timeMaxRefill[sec]:<input min=\"0\" max=\"600\" name=\"PP1\" step=\"1\" type=\"number\" value=\"%d\" /></td>\
+    <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Lamp3</strong><br>[%s]</td>\
+    <td style=\"width: 12.5%%;\">timeStart[hh:mm]:<input type=\"time\" name=\"TS3\" value=\"%.02d:%.02d\" /></td>\
     <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Fan</strong><br>[%s]<br>H2oTemp=%.1f</td>\
     <td style=\"width: 12.5%%;\">tempMaxH2o[deg]:<input min=\"0.0\" max=\"40.0\" name=\"PF1\" step=\"0.1\" type=\"number\" value=\"%.1f\" /></td>\
     <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Lamp1</strong><br>[%s]</td>\
@@ -92,29 +92,25 @@ void _handleRoot(const char *message) {
     <td style=\"width: 12.5%%; text-align: center;\" rowspan=\"3\"><strong>Lamp2</strong><br>[%s]</td>\
     <td style=\"width: 12.5%%;\">timeStart[hh:mm]:<input type=\"time\" name=\"TS2\" value=\"%.02d:%.02d\" /></td>\
     </tr><tr>\
-    <td style=\"width: 12.5%%;\">timeHyst[sec]:<input min=\"0\" max=\"600\" name=\"PP2\" step=\"1\" type=\"number\" value=\"%d\" /></td>\
+    <td style=\"width: 12.5%%;\">timeEnd[hh:mm]:<input type=\"time\" name=\"TE3\" value=\"%.02d:%.02d\" /></td>\
     <td style=\"width: 12.5%%;\">tempHyst[deg]:<input min=\"0.0\" max=\"1.0\" name=\"PF2\" step=\"0.1\" type=\"number\" value=\"%.1f\" /></td>\
     <td style=\"width: 12.5%%;\">timeEnd[hh:mm]:<input type=\"time\" name=\"TE1\" value=\"%.02d:%.02d\" /></td>\
     <td style=\"width: 12.5%%;\">timeEnd[hh:mm]:<input type=\"time\" name=\"TE2\" value=\"%.02d:%.02d\" /></td>\
     </tr><tr>\
-    <td style=\"width: 12.5%%;\">bEnable: <input type=\"checkbox\" name=\"E1\" %s /></td>\
+    <td style=\"width: 12.5%%;\">bEnable: <input type=\"checkbox\" name=\"E5\" %s /></td>\
     <td style=\"width: 12.5%%;\">bEnable: <input type=\"checkbox\" name=\"E2\" %s /></td>\
     <td style=\"width: 12.5%%;\">bEnable: <input type=\"checkbox\" name=\"E3\" %s /></td>\
     <td style=\"width: 12.5%%;\">bEnable: <input type=\"checkbox\" name=\"E4\" %s /></td>\
     </tr></tbody>\
     </table><br>\
     <input type=submit value=Change+Store>\
-    </form>\
-    <form action=\"/reset\">\
-    <strong>Pump Error: </strong> 0x%.01x \
-    <input type=submit value=Reset>\
-    </form><br>\
+    </form>\<br>\
     %s \
     </body></html>\n", ambT, ambH, timeNow.tm_hour, timeNow.tm_min,
-                       (bPump?"ON":"OFF"), l0, l1, sto.pump.timeMaxRefill, (bFan?"ON":"OFF"), H2oTemp, sto.fan.tempMaxH2o, (bLamp1?"ON":"OFF"), sto.lamp[0].timeStart/60, sto.lamp[0].timeStart%60, (bLamp2?"ON":"OFF"), sto.lamp[1].timeStart/60,sto.lamp[1].timeStart%60,
-                       sto.pump.timeHyst, sto.fan.tempHyst, sto.lamp[0].timeEnd/60, sto.lamp[0].timeEnd%60, sto.lamp[1].timeEnd/60, sto.lamp[1].timeEnd%60,
-                       sto.pump.bEnable?"checked":"", sto.fan.bEnable?"checked":"", sto.lamp[0].bEnable?"checked":"", sto.lamp[1].bEnable?"checked":"",
-                       sto.pump.maskErr,
+                       /*(bPump?"ON":"OFF"), l0, l1, sto.pump.timeMaxRefill,*/ (bLamp3?"ON":"OFF"), sto.lamp[2].timeStart/60, sto.lamp[2].timeStart%60, (bFan?"ON":"OFF"), H2oTemp, sto.fan.tempMaxH2o, (bLamp1?"ON":"OFF"), sto.lamp[0].timeStart/60, sto.lamp[0].timeStart%60, (bLamp2?"ON":"OFF"), sto.lamp[1].timeStart/60,sto.lamp[1].timeStart%60,
+                       /*sto.pump.timeHyst,*/ sto.lamp[2].timeEnd/60, sto.lamp[2].timeEnd%60, sto.fan.tempHyst, sto.lamp[0].timeEnd/60, sto.lamp[0].timeEnd%60, sto.lamp[1].timeEnd/60, sto.lamp[1].timeEnd%60,
+                       /*sto.pump.bEnable?"checked":"",*/sto.lamp[2].bEnable?"checked":"",  sto.fan.bEnable?"checked":"", sto.lamp[0].bEnable?"checked":"", sto.lamp[1].bEnable?"checked":"",
+                       /*sto.pump.maskErr,*/
                        message);
   server.send(200, "text/html", temp);
 }
@@ -133,14 +129,14 @@ void handleSetPar() {
   // http://192.168.2.103/?PP1=10&PF1=28.0&TS1=14:00&TS2=14:00&PP2=5&PF2=0.5&TE1=20:00&TE2=20:00&E1=on&E2=on&E3=on&E4=on
   for(int i=0;i<server.args();i++) {
     // pump
-    String txtPar=server.arg("PP1");
-    if(txtPar!="")
+    String txtPar/*=server.arg("PP1")*/;
+    /*if(txtPar!="")
       sto.pump.timeMaxRefill=txtPar.toInt();
     txtPar=server.arg("PP2");
     if(txtPar!="")
       sto.pump.timeHyst=txtPar.toInt();
     txtPar=server.arg("E1");
-    sto.pump.bEnable=(txtPar=="on")?true:false;
+    sto.pump.bEnable=(txtPar=="on")?true:false;*/
     // fan
     txtPar=server.arg("PF1");
     if(txtPar!="")
@@ -168,6 +164,15 @@ void handleSetPar() {
       sto.lamp[1].timeEnd=txtPar.substring(0,2).toInt()*60+txtPar.substring(3).toInt();
     txtPar=server.arg("E4");
     sto.lamp[1].bEnable=(txtPar=="on")?true:false;
+    // lamp2
+    txtPar=server.arg("TS3");
+    if(txtPar!="")
+      sto.lamp[2].timeStart=txtPar.substring(0,2).toInt()*60+txtPar.substring(3).toInt();
+    txtPar=server.arg("TE3");
+    if(txtPar!="")
+      sto.lamp[2].timeEnd=txtPar.substring(0,2).toInt()*60+txtPar.substring(3).toInt();
+    txtPar=server.arg("E5");
+    sto.lamp[2].bEnable=(txtPar=="on")?true:false;
   }
   saveData();
   bForce=true;
